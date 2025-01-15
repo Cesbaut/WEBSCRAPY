@@ -6,6 +6,9 @@ from scrapy.loader import ItemLoader
 
 from bs4 import BeautifulSoup
 
+from scrapy.crawler import CrawlerProcess #para ejecucion sin consola
+
+
 class Noticia(Item):
     titular = Field()
     descripcion = Field()
@@ -29,7 +32,39 @@ class ElUniversoSpider(Spider): #Siempre debe heredar de spaider
         #     yield item.load_item()
 
         soup = BeautifulSoup(response.body)
-        contenedor_noticias = soup.find_all("div", class_="relative")
+        contenedor_noticias = soup.find_all("li", class_="relative")
 
         for contenedor in contenedor_noticias:
-            noticias = contenedor.find_all("all",class_s="card")
+            noticias = contenedor.find_all("div",class_="card", recursive=False) #Recursive : la busqueda se hara en los hijos directos o en cualquier hijo
+            for noticia in noticias:
+                item = ItemLoader(Noticia(), response.body)
+
+                titular = noticia.find("h2")
+
+                descripcion = noticia.find("p")
+
+                if(titular != None):
+                    titular = titular.text
+                else:
+                    titular = "N/A"
+                if (descripcion != None):
+                    descripcion = descripcion.text
+                else:
+                    descripcion = "N/A"
+
+           
+                item.add_value("titular", titular)
+                item.add_value("descripcion", descripcion)
+
+                yield item.load_item()
+
+
+
+#Ejecucion sin consola
+process = CrawlerProcess({
+    'FEED_FORMAT': 'json',
+    'FEED_URI': 'datos_de_salida_3.json'
+})
+
+process.crawl(ElUniversoSpider)
+process.start()
