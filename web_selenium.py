@@ -17,8 +17,12 @@ driver.get('https://www.olx.in/')
 
 boton =  driver.find_element("xpath", "//button[@data-aut-id='btnLoadMore']")
 
+boton2 =  driver.find_element("xpath", "//input[@data-aut-id='searchBox']")
 
-for i in range(3):
+boton2.send_keys("Texto que quiero escribir")
+
+
+for i in range(1):
     try:
         boton.click()
         sleep(random.uniform(8,10))
